@@ -1,5 +1,4 @@
 from enum import Enum, auto
-# from typing import List
 
 # Exception if lexeme is unknown
 class UnknownKeyError(Exception):
@@ -135,9 +134,3 @@ class Scanner:
     def to_str(self):
         for token in self.tokens:
             print(f"{token.lexeme} | {token.token_type}")
-
-
-scanner = Scanner("+=!=>====")
-scanner.scan()
-scanner.to_str()
-
