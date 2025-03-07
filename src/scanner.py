@@ -1,5 +1,8 @@
 from enum import Enum, auto
-
+"""
+    - Add support for literals
+    - Make sure to increment location on \n and inc (I probably won't need logic for col)
+"""
 # Exception if lexeme is unknown
 class UnknownKeyError(Exception):
     def __init__(self, message) -> None:
@@ -34,7 +37,7 @@ class TokenType(Enum):
     LTEQUAL = auto()
     EQEQUAL = auto()
     NOTEQUAL = auto()
-    # 
+    # End of File
     EOF = auto()
 
 
@@ -65,19 +68,22 @@ lookup = {
 }
 
 class Token:
-    def __init__(self, token_type: TokenType, lexeme: str, location: list, literal=None):
+    def __init__(self, token_type: TokenType, lexeme: str, location: list[int], literal=None):
         self.token_type = token_type
         self.lexeme = lexeme
         self.location = location 
         self.literal = literal
 
+    def stringify(self):
+        print(f"{self.lexeme} | {self.token_type} | {self.location}")
+
 class Scanner:
     def __init__(self, src: str) -> None:
         self.src = src
         self.start = 0
-        self.pos = [1, 0] # current line and position data for token
+        self.pos = [1, 1]
         self.curr = 0
-        self.tokens = []
+        self.tokens: list[Token] = []
     
     def scan(self) -> list:
         print(self.src)
@@ -90,7 +96,7 @@ class Scanner:
     def completed(self):
         if (self.curr >= len(self.src)): return True
         return False
-
+    
     def match(self) -> None:
         self.start = self.curr
         match self.current():
@@ -104,14 +110,17 @@ class Scanner:
                 self.add_token(TokenType.EQEQUAL, '==', self.pos, None) if self.next('=') else self.add_token(TokenType.EQUAL, '=', self.pos, None)
             case '/':
                 pass
+            case '\n':
+                self.pos[0] += 1
+                self.pos[1] = 0
             case _:
-                if self.current() not in lookup: raise UnknownKeyError("not real brother")
+                if self.current() not in lookup: raise UnknownKeyError("An unknown character has occurred")
                 self.add_token(lookup[self.current()], self.current(), self.pos) # base case for any single-char lexeme
+        self.pos[1] += 1
         self.adv()
 
     def add_token(self, token_type: TokenType, lexeme: str, pos: list, literal=None) -> None:
-        self.tokens.append(Token(token_type, lexeme, pos, literal))
-        pass
+        self.tokens.append(Token(token_type, lexeme, pos.copy(), literal)) # error before was that I was passing by reference, not by value
 
     def current(self) -> str:
         return self.src[self.curr]
@@ -127,10 +136,10 @@ class Scanner:
 
     def next(self, char: str):
         next = True if (self.peek() == char) else False
-        if next: self.adv();
+        if next: self.adv();self.pos[1] +=1
         return next
 
     # Test function
     def to_str(self):
         for token in self.tokens:
-            print(f"{token.lexeme} | {token.token_type}")
+            token.stringify()
