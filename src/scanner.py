@@ -110,6 +110,8 @@ class Scanner:
                 self.add_token(TokenType.EQEQUAL, '==', self.pos, None) if self.next('=') else self.add_token(TokenType.EQUAL, '=', self.pos, None)
             case '/':
                 pass
+            case ' ' | '\t' | '\r': # types of whitespace
+                pass # should be ignored for the most part
             case '\n':
                 self.pos[0] += 1
                 self.pos[1] = 0
