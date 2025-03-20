@@ -17,7 +17,6 @@ def repl() -> None:
 
 def file(path: str) -> None:
     if not os.path.isfile(path):
-        print('working')
         raise FileNotFoundError("File missing brother")
 
     with open(path, "r") as f:
